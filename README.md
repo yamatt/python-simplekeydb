@@ -1,5 +1,6 @@
 # What?
 A Python module that allows you to store a key/value pair database (much like [[CouchDB]]) on your local filesystem, using Python APIs. 
+
 # API
  * __init__ -- Accepts path to database file
  * __del__ -- Closes database file when no longer being used
@@ -15,8 +16,10 @@ A Python module that allows you to store a key/value pair database (much like [[
  * delete_keys -- Same as above but accepts tuple containing Key strings
      * This function doesn't force DeleteKey to save, it forces the save once the process is complete
  * dump -- Returns the entire database
+
 # Future
  1. More advanced key matching
+
 # Examples
 ## Basic
     from simplekeydb import SimpleKeyDB
