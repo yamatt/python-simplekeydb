@@ -1,5 +1,5 @@
 # What?
-A Python module that allows you to store a key/value pair database (much like [[CouchDB]]) on your local filesystem, using Python APIs. 
+A Python module that allows you to store a key/value pair database (much like CouchDB) on your local filesystem, using Python APIs.
 
 # API
  * __init__ -- Accepts path to database file
