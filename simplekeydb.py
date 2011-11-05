@@ -36,7 +36,8 @@ class SimpleKeyDB:
            Arguments:
              db_path: str() - the file the database will be stored in."""
         self._db = shelve.open(db_path)
-        self._db_old = self._db;
+        self._db_old = self._db
+        self._open = True
 
     def save(self):
         """Description: save any changes to the database to the file."""
@@ -47,24 +48,42 @@ class SimpleKeyDB:
         """Description: save and close the database."""
         if not save:
             self.revert()
-        self._db.close()
+        if self._open:
+            self._db.close()
+            self._open = False
+            return True
+        return False # could not save
 
     def revert(self):
         """Description: reset database to before last save."""
         self._db = self._db_old
         
     def has_key (self, key):
+        """Description: checks if the keys exist.
+           Arguments:
+             key: str() - the name of the key to check for"""
         return self._db.has_key(key)
+        
+    def has_keys(self, keys):
+        """Description: checks if the keys exist.
+           Arguments:
+             keys: list() - the name of the key to check for"""
+        all_exist = True
+        for key in keys:
+            if not self.has_key(key):
+                all_exist = False
+                break
+        return all_exist
 
     def add_key (self, key, value, save=True):
-	"""Description: adds or updates a single key/value pair to the database.
+        """Description: adds or updates a single key/value pair to the database.
            Arguments:
              key_name: str() - the name of the key.
              key_value: obj() - the value to associate with the key.
              save: bool() - whether to save changes to the file (default:
                True)"""
         if not self._db.has_key(key):
-            self._db[key] = key
+            self._db[key] = value
         else:
             raise KeyValue('Key %s already exists. You may have to update it.' \
                % key_name)
@@ -111,7 +130,7 @@ class SimpleKeyDB:
             raise KeyError ('Key %s does not exist. It must be created first' \
                 % key)
         if save:
-            self._db.save()
+            self.save()
             
     def update_keys (self, key_dict, save=True):
         """Description: change the contents of multiple keys.
