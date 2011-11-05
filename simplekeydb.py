@@ -31,7 +31,8 @@ class SimpleKeyDB:
         self.close()
 
     def open (self, db_path):
-        """Description: opens the database file and stores it in a private object.
+        """Description: opens the database file and stores it in a private
+                        object.
            Arguments:
              db_path: str() - the file the database will be stored in."""
         self._db = shelve.open(db_path)
@@ -51,23 +52,34 @@ class SimpleKeyDB:
     def revert(self):
         """Description: reset database to before last save."""
         self._db = self._db_old
+        
+    def has_key (self, key):
+        return self._db.has_key(key)
 
-    def add_key (self, key_name, key_value, save=True):
+    def add_key (self, key, value, save=True):
 	"""Description: adds or updates a single key/value pair to the database.
            Arguments:
              key_name: str() - the name of the key.
              key_value: obj() - the value to associate with the key.
-             save: bool() - whether to save changes to the file (default: True)"""
-        self._db[key_name] = key_value
+             save: bool() - whether to save changes to the file (default:
+               True)"""
+        if not self._db.has_key(key):
+            self._db[key] = key
+        else:
+            raise KeyValue('Key %s already exists. You may have to update it.' \
+               % key_name)
         if save:
             self.save()
 
     def add_keys (self, key_dict, save=True):
         """Description: similar to add_key, but for multiple entries.
            Arguments:
-             key_dict: dict() - a dictionary object containing new and updated values.
-             save: bool() - whether to save changes to the file (default: True)"""
-        self._db.update(key_dict)
+             key_dict: dict() - a dictionary object containing new and updated
+               values.
+             save: bool() - whether to save changes to the file (default: 
+               True)"""
+        for key, val in key_dict.iteritems():
+            self.add_key(key, val, False)
         if save:
             self.save()
 
@@ -85,26 +97,54 @@ class SimpleKeyDB:
         for key in keys:
             returnValues[key] = self.get_key(key)
         return returnValues
+        
+    def update_key (self, key, value, save=True):
+        """Description: change the contents of a key
+           Arguments:
+             key: str() - the name of the key to update
+             value: obj() - the new entry you would like to insert
+             save: bool() - whether to save the database to the file (default:
+               True)"""
+        if self._db.has_key(key):
+            self._db[key] = value
+        else:
+            raise KeyError ('Key %s does not exist. It must be created first' \
+                % key)
+        if save:
+            self._db.save()
+            
+    def update_keys (self, key_dict, save=True):
+        """Description: change the contents of multiple keys.
+           Arguments:
+             key_dict: dict() - a dictionary containing all the values to update
+             save: bool() - whether to save the database to the file (default:
+               True)"""
+        for key, val in key_dict.iteritems():
+            self.update_key(key, val, False)
+        if save:
+            self.save()
 
     def delete_key (self, key, save=True):
         """Description: remove the key/value from the database.
            Arguments:
              key: str() - the name of the key to delete.
-             save: bool() - whether to save the database to the file (default: True)"""
+             save: bool() - whether to save the database to the file (default:
+                True)"""
         del self._db[key]
         if save:
             self.save()
-
+            
     def delete_keys (self, keys, save=True):
         """Description: similar to delete_key but for several keys.
            Arguments:
              keys: list() - a list of keys to delete from the database.
-             save: bool() - whether to save these changes to the database (default: True)"""
+             save: bool() - whether to save these changes to the database (default
+                True)"""
         for key in keys:
             del self._db[key]
         if save:
             self.save()
-
+            
     def dump (self):
         """Description: returns a copy of the database."""
         return dict(self._db)
